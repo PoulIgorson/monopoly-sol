@@ -1,0 +1,53 @@
+Игра "Монополия: Высокие ставки"
+
+Контракты:
+ - Game
+   - Vars:
+     - bool inAir (Если true, нельзя изменять игру)
+     - IField field
+     - struct Player
+       - bool exist
+       - uint index
+       - uint balance
+       - bool WantLeftGame
+     - mapping(address => Player) players
+     - address[] playerAddresses
+     - uint indexCurPlayer
+     - uint numMoveStep
+     - uint moveTime
+
+    - Func:
+      - Start() IsOwner
+      - TheEnd() IsOwner
+      - CountWantLeftGame() uint
+      - CountPlayers() uint
+      - JoinToGame() payable
+      - LeftGame() EndGame
+      - WantLentGame()
+      - NotWantLeftGame()
+      - MoveStepOne() string[] memory
+      - MoveStepTwo() string[] memory
+      - GetCell(uint index) mapping(string memory => string memory)
+      - GetField() mapping(string memory => string memory)[]
+      - GetSelfInfo() mapping(string memory => string memory)[]
+
+ - Field
+   - Vars:
+     - bool inAir (Если true, нельзя изменять поле)
+     - struct Cell
+       - uint cost (Начальная цена)
+       - uint rent (Аренда)
+       - uint deposit (Залог)
+       - bool isSpec (Если true, доступны нажние поля
+       - uint _salary
+       - bool _prison
+       - bool _parking
+     - Cell[] field
+   - Func:
+     - AddCell(uint cost, rent, deposit) IsOwner
+     - AddCells(mapping(string memory => uint)[] cells) IsOwner
+     - AddSpecCell(uint salary, bool prison, parking) IsOwner
+     - DelCell(uint index) IsOwner
+     - DelCells(uint[] indexes) IsOwner
+     - GetCell(uint index) mapping(string memory => string memory)
+     - GetField() mapping(string memory => string memory)[]
