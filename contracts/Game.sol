@@ -7,6 +7,7 @@ import "./external/Strings.sol";
 import "./external/_strings.sol";
 
 
+// Rundom number
 contract Random {
     uint randNoice;
 
@@ -15,6 +16,7 @@ contract Random {
     }
 }
 
+// Concatenate strings
 contract Concatenate {
     using strings for *;
 
@@ -53,14 +55,14 @@ contract Game {
     bool public inAir; // Если true, нельзя изменять игру
     address public owner;
     IField field;
-    struct Player {
+    struct Player { // Игрок на поле
         address user;
         uint index;
         uint balance;
         bool WantLeftGame;
         uint8 prison;
     }
-    struct InfoCell {
+    struct InfoCell { // Информацция о владении клетки
         uint statusSale; // 0 - Свободно, 1 - Куплен, 2 - Заложен
         address owner;
     }
@@ -97,27 +99,32 @@ contract Game {
         field = IField(_field);
     }
 
+    // Фукнция смены поля
     function ChangeField(address _field) public EndGame IsOwner {
         field = IField(_field);
     }
 
+    // Функция начала игры
     function Start() public EndGame IsOwner {
         inAir = true;
         field.SetInAir(true);
         emit STARTGAME(block.timestamp);
     }
 
+    // Функция конца игры
     function TheEnd() public INAIR IsOwner {
         inAir = false;
         field.SetInAir(false);
         emit ENDGAME(block.timestamp);
     }
 
+    // Функция очищения желающих выйти из игры
     function ClearWantLeftGame() public IsOwner {
         for (uint i = 0; i < CountPlayers(); i++)
             players[playerAddresses[i]].WantLeftGame = false;
     }
 
+    // Количество желающих выйти из игры
     function CountWantLeftGame() public view returns(uint) {
         uint count = 0;
         for (uint i = 0; i < CountPlayers(); i++)
@@ -126,10 +133,12 @@ contract Game {
         return count;
     }
 
+    // Количество игроков
     function CountPlayers() public view returns(uint) {
         return playerAddresses.length;
     }
 
+    // Функция присоединения к игре
     function JoinToGame() public payable EndGame {
         require(msg.value == 0.2 ether, "Game: for join to game need 0.2 ether");
         require(players[msg.sender].user != msg.sender, "Game: you already in the game");
@@ -139,6 +148,7 @@ contract Game {
         emit NEWPLAYER(msg.sender);
     }
 
+    // Функция выхода из игры
     function LeftGame() public IsPlayer EndGame {
         delete players[msg.sender];
         uint index = 0;
@@ -153,16 +163,19 @@ contract Game {
         playerAddresses.pop();
     }
 
+    // Выставить отметку, что хочешь выйти
     function WantLeftGame() public IsPlayer INAIR {
         players[msg.sender].WantLeftGame = true;
         emit WANTLEFtGAME(msg.sender);
     }
 
+    // Выставить отметку, что больше не хочешь выйти
     function NotWantLeftGame() public IsPlayer INAIR {
         players[msg.sender].WantLeftGame = false;
         emit NOTWANTLEFtGAME(msg.sender);
     }
 
+    // Первый этап хода, бросок кубиков и вывод информации о текущей клетки игрока
     function RollDice() public INAIR returns(string[][] memory) {
         require(msg.sender == playerAddresses[indexCurPlayer], "Game: now is not your move");
         require(numMoveStep == 1, "Game: now is not this step");
@@ -220,6 +233,7 @@ contract Game {
         return info;
     }
 
+    // Функция передачи хода
     function PassMove() public IsPlayer INAIR returns(string[] memory) {
         require(msg.sender == playerAddresses[indexCurPlayer], "Game: now is not your move");
         require(numMoveStep == 2, "Game: now is not this step");
@@ -232,6 +246,7 @@ contract Game {
         return info;
     }
 
+    // Функция покупки клетки
     function BuyCell() public IsPlayer INAIR returns(string[][] memory) {
         require(msg.sender == playerAddresses[indexCurPlayer], "Game: now is not your move");
         require(numMoveStep == 2, "Game: now is not this step");
@@ -254,6 +269,7 @@ contract Game {
         return info;
     }
 
+    // Функция заложения клетки
     function DepositCell(uint index) public IsPlayer INAIR returns(string[][] memory) {
         require(msg.sender == playerAddresses[indexCurPlayer], "Game: now is not your move");
         require(numMoveStep == 2, "Game: now is not this step");
@@ -274,14 +290,17 @@ contract Game {
         return info;
     }
 
+    // Функция вывода информаци о клетки
     function GetCell(uint index) public view returns(string[] memory) {
         return field.GetCell(index);
     }
 
+    // Функция вывода информаци о поле
     function GetField() public view returns(string[][] memory) {
         return field.GetField();
     }
 
+    // Функция вывода информаци об игроке
     function GetPlayerInfo(address addr) public view returns(Player memory) {
         require(players[addr].user != address(0), "Game: got address is not player");
         return players[addr];

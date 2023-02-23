@@ -14,9 +14,9 @@ contract Field {
         uint rent; // Аренда
         uint deposit; // Залог
         bool isSpec; // Если true, доступны нижние поля
-        uint _salary;
-        bool _prison;
-        bool _parking;
+        uint _salary; // Бонус за наступление на клекту
+        bool _prison; // Тюрьма
+        bool _parking; // Парковка / своюодная клетка
     }
     Cell[] field;
 
@@ -30,18 +30,22 @@ contract Field {
     modifier IsOwner {require(msg.sender == owner, "Field: you is not owner field"); _;}
     modifier EndGame {require(!inAir, "Field: game is not end"); _;}
 
+    // Функция установки награды за прохождение круга
     function SetStartSalary(uint salary) public EndGame IsOwner {
         field[0]._salary = salary;
     }
 
+    // Функция установки начала/конца игры
     function SetInAir(bool _inAir) public {
         inAir = _inAir;
     }
 
+    // Функция получения количества клеток
     function CountCells() public view returns(uint) {
         return field.length;
     }
 
+    // Функция доавления обычной клетки
     function AddCell(uint cost, uint rent, uint deposit) public EndGame IsOwner {
         Cell memory cell;
         cell.cost = cost;
@@ -50,11 +54,13 @@ contract Field {
         field.push(cell);
     }
 
+    // Функция добавление списка обычных клеток
     function AddCells(uint[][] memory cells) public EndGame IsOwner {
         for (uint i = 0; i < cells.length; i++)
             AddCell(cells[i][0], cells[i][1], cells[i][1]);
     }
 
+    // Функция добавления особой клетки
     function AddSpecCell(uint salary, bool prison, bool parking) public EndGame IsOwner {
         uint8 check = 0;
         if (salary > 0) check += 1;
@@ -69,6 +75,7 @@ contract Field {
         field.push(cell);
     }
 
+    // Функция удаления клетки по ее индексу
     function DelCell(uint index) public EndGame IsOwner {
         require(index < field.length, "Field: index does not exists");
         for (uint i = index; i < field.length - 1; i++) {
@@ -77,6 +84,7 @@ contract Field {
         field.pop();
     }
 
+    // Функция удаления клеткок по их индексу
     function DelCells(uint[] memory indexes) public EndGame IsOwner {
         indexes = sort.sort(indexes);
         uint count_delete = 0;
@@ -87,10 +95,12 @@ contract Field {
         }
     }
 
+    // Функция получения количество свойсв у клетки
     function GetCountFieldCell() public pure returns(uint) {
         return uint(7);
     }
 
+    // Функция получения информации о клетке
     function GetCell(uint index) public view returns(string[] memory) {
         require(index < field.length, "Field: index does not exists");
         string[] memory info = new string[](7);
@@ -112,6 +122,7 @@ contract Field {
         return info;
     }
 
+    // Функция получения информации о поле
     function GetField() public view returns(string[][] memory) {
         string[][] memory info = new string[][](field.length);
         for (uint i = 0; i < field.length; i++)
@@ -119,11 +130,13 @@ contract Field {
         return info;
     }
 
+    // Функция получения клетки
     function GetCellStruct(uint index) public view returns(Cell memory) {
         require(index < field.length, "Field: index does not exists");
         return field[index];
     }
 
+    // Функция получения поля
     function GetFieldStruct() public view returns(Cell[] memory) {
         return field;
     }
